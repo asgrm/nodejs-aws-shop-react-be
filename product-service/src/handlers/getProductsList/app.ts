@@ -12,6 +12,6 @@ export const handler = async (
 
     return buildResponse(200, products);
   } catch (err: any) {
-    return buildResponse(200, err.message)
+    return buildResponse(500, err.message)
   }
 }

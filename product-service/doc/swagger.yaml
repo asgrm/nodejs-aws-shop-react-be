@@ -1,0 +1,79 @@
+openapi: 3.0.3
+info:
+  title: Swagger Petstore - OpenAPI 3.0
+  description: |-
+    Product Service for [RS AWS course](https://github.com/rolling-scopes-school/aws).
+  termsOfService: http://swagger.io/terms/
+  contact:
+    email: apiteam@swagger.io
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.11
+externalDocs:
+  description: Find out more about Swagger
+  url: http://swagger.io
+servers:
+  - url: https://rm5iv9sh3g.execute-api.eu-west-1.amazonaws.com
+tags:
+  - name: Products
+    description: Product related endpoints
+paths:
+  /products:
+    get:
+      tags:
+        - Products
+      summary: Get all products
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Product"
+        "500":
+          description: Internal Server Error, default BE error code
+  /products/{productId}:
+    get:
+      tags:
+        - Products
+      summary: Get all products
+      parameters:
+        - name: productId
+          in: path
+          description: ID of
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Get product by productId
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+        "404":
+          description: Product not found
+        "500":
+          description: Internal Server Error, default BE error code
+components:
+  schemas:
+    Product:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "bf67ec4b-b10c-48c5-9345-fc73c48abb57"
+        title:
+          type: string
+          example: "Amazing toy for everyone"
+        description:
+          type: string
+          example: "A stick"
+        quantity:
+          type: integer
+          example: 7.2

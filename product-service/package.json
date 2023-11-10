@@ -17,6 +17,7 @@
     "@aws-cdk/aws-apigatewayv2-alpha": "^2.105.0-alpha.0",
     "@aws-cdk/aws-apigatewayv2-integrations-alpha": "^2.105.0-alpha.0",
     "@types/jest": "^29.5.5",
+    "@types/joi": "^17.2.3",
     "@types/node": "20.7.1",
     "@typescript-eslint/eslint-plugin": "^6.10.0",
     "@typescript-eslint/parser": "^6.10.0",
@@ -33,6 +34,7 @@
     "@types/aws-lambda": "^8.10.126",
     "aws-cdk-lib": "2.104.0",
     "constructs": "^10.0.0",
-    "dotenv": "^16.3.1"
+    "dotenv": "^16.3.1",
+    "joi": "^17.11.0"
   }
 }

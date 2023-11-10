@@ -18,3 +18,16 @@ export function buildResponse(statusCode: number = 200, body?: any, headers?: ob
     }
   })
 }
+
+export function checkBodyParameters<T extends Record<string | symbol, unknown>>(
+  requiredParameters: Array<keyof T>,
+  data: T
+): boolean {
+  return requiredParameters.every((parameter) => {
+    const parameterValue = data[parameter];
+    if (parameterValue === undefined) {
+      return false;
+    }
+    return true;
+  });
+}
