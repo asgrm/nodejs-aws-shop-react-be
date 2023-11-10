@@ -6,7 +6,7 @@ product service for RS School AWS CLOUD DEVELOPER course
 
 [Deployed FE](https://dy3tk6hsbm1nj.cloudfront.net)
 
-[Deployed BE API](https://rm5iv9sh3g.execute-api.eu-west-1.amazonaws.com)
+[Deployed BE URL](https://rm5iv9sh3g.execute-api.eu-west-1.amazonaws.com)
 
 ## Useful commands
 
