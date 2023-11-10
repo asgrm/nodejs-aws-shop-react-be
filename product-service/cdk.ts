@@ -5,7 +5,8 @@ import * as lambda from 'aws-cdk-lib/aws-lambda';
 import { NodejsFunction, NodejsFunctionProps } from 'aws-cdk-lib/aws-lambda-nodejs';
 import 'dotenv/config';
 
-const BASE = '/products';
+const BASE_URL = 'products';
+const BASE = `/${BASE_URL}`;
 
 const app = new cdk.App();
 const stack = new cdk.Stack(app, "ProductServiceStack", {
@@ -55,5 +56,5 @@ api.addRoutes({
 
 
 new cdk.CfnOutput(stack, 'ApiUrl', {
-  value: `${api.url}${BASE}`,
+  value: `${api.url}${BASE_URL}`,
 });
