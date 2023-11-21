@@ -1,15 +1,9 @@
 import * as Joi from "joi";
 
-export const ProductSchema = Joi.object({
-  id: Joi.string().required(),
+export const productSchema = Joi.object({
   title: Joi.string().required(),
   description: Joi.string().required(),
   price: Joi.number().positive().required(),
+  count: Joi.number().positive().required(),
 });
 
-export interface Product {
-  id: string;
-  title: string,
-  description: string,
-  price: number,
-}
