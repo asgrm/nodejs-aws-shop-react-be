@@ -51,6 +51,8 @@ paths:
       responses:
         "200":
           description: successful operation
+        "400":
+          description: Validation failed
         "500":
           description: Internal Server Error, default BE error code
   /products/{productId}:
