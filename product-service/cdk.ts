@@ -43,29 +43,17 @@ const getProductsById = new NodejsFunction(stack, 'GetProductsByIdLambda', {
   functionName: 'getProductsById',
 });
 
-const getProductsListA = new NodejsFunction(stack, 'GetProductsListLambdaA', {
-  ...sharedLambdaProps,
-  entry: 'src/handlers/getProductsListA/app.ts',
-  functionName: 'getProductsListA',
-});
-
-const getProductsByIdA = new NodejsFunction(stack, 'GetProductsByIdLambdaA', {
-  ...sharedLambdaProps,
-  entry: 'src/handlers/getProductsByIdA/app.ts',
-  functionName: 'getProductsByIdA',
-});
-
 const createProduct = new NodejsFunction(stack, 'CreateProductLambda', {
   ...sharedLambdaProps,
   entry: 'src/handlers/createProduct/app.ts',
   functionName: 'createProduct',
 });
 
-productsTable.grantReadData(getProductsListA);
-stocksTable.grantReadData(getProductsListA);
+productsTable.grantReadData(getProductsList);
+stocksTable.grantReadData(getProductsList);
 
-productsTable.grantReadData(getProductsByIdA);
-stocksTable.grantReadData(getProductsByIdA);
+productsTable.grantReadData(getProductsById);
+stocksTable.grantReadData(getProductsById);
 
 productsTable.grantWriteData(createProduct);
 stocksTable.grantWriteData(createProduct);
@@ -79,7 +67,7 @@ const api = new apiGateway.HttpApi(stack, 'ProductApi', {
 });
 
 api.addRoutes({
-  path: BASE,
+  path: `${BASE}`,
   methods: [apiGateway.HttpMethod.GET],
   integration: new HttpLambdaIntegration('GetProductsListLambdaIntegration', getProductsList)
 });
@@ -87,20 +75,7 @@ api.addRoutes({
 api.addRoutes({
   path: `${BASE}/{productId}`,
   methods: [apiGateway.HttpMethod.GET],
-
   integration: new HttpLambdaIntegration('GetProductsByIdIntegration', getProductsById),
-});
-
-api.addRoutes({
-  path: `${BASE}A`,
-  methods: [apiGateway.HttpMethod.GET],
-  integration: new HttpLambdaIntegration('GetProductsListLambdaIntegration', getProductsListA)
-});
-
-api.addRoutes({
-  path: `${BASE}A/{productId}`,
-  methods: [apiGateway.HttpMethod.GET],
-  integration: new HttpLambdaIntegration('GetProductsByIdIntegration', getProductsByIdA),
 });
 
 api.addRoutes({
