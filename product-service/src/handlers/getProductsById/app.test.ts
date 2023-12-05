@@ -1,6 +1,6 @@
 import { handler } from "./app";
-import { products } from "../../mocks/data";
 import { APIGatewayProxyEvent } from "aws-lambda";
+import * as dynamoDBUtils from "../../db/dynamoDB/utils";
 
 const createMockEvent = (productId: string | undefined): APIGatewayProxyEvent => ({
   pathParameters: {
@@ -11,7 +11,7 @@ const createMockEvent = (productId: string | undefined): APIGatewayProxyEvent =>
   multiValueHeaders: {},
   httpMethod: "GET",
   isBase64Encoded: false,
-  path: "/products/123",
+  path: `/products/${productId}`,
   queryStringParameters: null,
   multiValueQueryStringParameters: null,
   stageVariables: null,
@@ -20,27 +20,59 @@ const createMockEvent = (productId: string | undefined): APIGatewayProxyEvent =>
 });
 
 describe("getProductsById", () => {
-  test("Should return a product with a given ID", async () => {
-    const mockEvent = createMockEvent(products[0].id);
-    const response = await handler(mockEvent);
+  let queryItemSpy: jest.SpyInstance;
 
+  beforeEach(() => {
+    queryItemSpy = jest.spyOn(dynamoDBUtils, "queryItem");
+  });
+
+  afterEach(() => {
+    queryItemSpy.mockClear();
+  });
+
+  afterAll(() => {
+    queryItemSpy.mockRestore();
+  });
+
+  test("should return a product with structure", async () => {
+    const testId = '00000000-0000-0000-0000-000000000000'
+    const mockedProduct = {
+      id: testId,
+      title: "mock product",
+      description: "mock description",
+      price: 100,
+    };
+
+    const mockedStock = {
+      product_id: testId,
+      count: 20
+    };
+
+    queryItemSpy.mockResolvedValueOnce(mockedProduct);
+    queryItemSpy.mockResolvedValueOnce(mockedStock);
+
+    const mockEvent: APIGatewayProxyEvent = createMockEvent(testId);
+
+    const response = await handler(mockEvent);
     expect(response.statusCode).toBe(200);
-    expect(JSON.parse(response.body)).toEqual(products[0]);
+    expect(queryItemSpy).toHaveBeenCalledTimes(2);
   });
 
-  test("Should return a 404 error for a nonexistent product ID", async () => {
-    const mockEvent = createMockEvent("nonexistent-product-id");
-    const response = await handler(mockEvent);
+  test("should return 404 error if product was not found", async () => {
+    queryItemSpy.mockResolvedValueOnce(null);
 
+    const mockEvent: APIGatewayProxyEvent = createMockEvent('nonexistent-product-id');
+
+    const response = await handler(mockEvent);
     expect(response.statusCode).toBe(404);
-    expect(response.body).toContain("Product not found");
+    expect(queryItemSpy).toHaveBeenCalledTimes(1);
   });
 
-  test("Should return a 404 error for a missing product ID", async () => {
-    const mockEvent = createMockEvent(undefined);
-    const response = await handler(mockEvent);
+  test("should return 404 error when no id is provided", async () => {
+    const mockEvent: APIGatewayProxyEvent = createMockEvent(undefined);
 
+    const response = await handler(mockEvent);
     expect(response.statusCode).toBe(404);
-    expect(response.body).toContain("Product not found");
+    expect(queryItemSpy).not.toHaveBeenCalled();
   });
 });

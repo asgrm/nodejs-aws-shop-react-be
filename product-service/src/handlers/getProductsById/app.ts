@@ -1,5 +1,8 @@
-import { buildResponse } from '../../utils/utils'
-import { products } from '../../mocks/data'
+import { buildResponse } from '../../utils/utils';
+import {
+  queryItem
+} from '../../db/dynamoDB/utils';
+import { Stock } from '../../types/index'
 import {
   APIGatewayProxyEvent,
   APIGatewayProxyResult
@@ -15,15 +18,19 @@ export const handler = async (
       console.log('no productId');
       return buildResponse(404, 'Product not found');
     }
+    const prd = await queryItem('id', productId, process.env.TABLE_NAME_PRODUCT!);
 
-    const product = products.find(el => el.id === productId);
-
-    if (!product) {
+    if (!prd) {
       console.log('no product');
-      return buildResponse(404, 'Product not found');
+      return buildResponse(404, { message: 'Product not found' });
     }
 
-    return buildResponse(200, product);
+    const stock = await queryItem('product_id', productId, process.env.TABLE_NAME_STOCK!) as Stock | null;
+    const res = {
+      ...prd,
+      count: (stock?.count || 0)
+    };
+    return buildResponse(200, res);
   } catch (err: any) {
     return buildResponse(500, err.message)
   }

@@ -1,4 +1,4 @@
-import { Product } from '../schemas/product'
+import { Product, Stock } from '../types/index'
 
 export const products: Product[] = [
   {
@@ -157,4 +157,32 @@ export const products: Product[] = [
     price: 40,
     title: "Sky Surfer Drone",
   },
+];
+export const stocks: Stock[] = [
+  { product_id: '7567ec4b-b10c-48c5-9345-fc73c48a80aa', count: 18 },
+  { product_id: '7567ec4b-b10c-48c5-9345-fc73c48a80a1', count: 19 },
+  { product_id: '7567ec4b-b10c-48c5-9345-fc73c48a80a3', count: 9 },
+  { product_id: '7567ec4b-b10c-48c5-9345-fc73348a80a1', count: 12 },
+  { product_id: '7567ec4b-b10c-48c5-9445-fc73c48a80a2', count: 14 },
+  { product_id: '7567ec4b-b10c-45c5-9345-fc73c48a80a1', count: 12 },
+  { product_id: '7567ec4b-b10c-48c5-9345-fc73c48a80a4', count: 16 },
+  { product_id: '7567ec4b-b10c-48c5-9345-fc73c48a80a5', count: 11 },
+  { product_id: '7567ec4b-b10c-48c5-9345-fc73c48a80a6', count: 7 },
+  { product_id: '7567ec4b-b10c-48c5-9345-fc73c48a80a7', count: 6 },
+  { product_id: '7567ec4b-b10c-48c5-9345-fc73c48a80a8', count: 14 },
+  { product_id: '7567ec4b-b10c-48c5-9345-fc73c48a80a9', count: 14 },
+  { product_id: '7567ec4b-b10c-48c5-9345-fc73c48a80b0', count: 10 },
+  { product_id: '7567ec4b-b10c-48c5-9345-fc73c48a80b1', count: 19 },
+  { product_id: '7567ec4b-b10c-48c5-9345-fc73c48a80b2', count: 8 },
+  { product_id: '7567ec4b-b10c-48c5-9345-fc73c48a80b3', count: 7 },
+  { product_id: '7567ec4b-b10c-48c5-9345-fc73c48a80b4', count: 15 },
+  { product_id: '7567ec4b-b10c-48c5-9345-fc73c48a80b5', count: 9 },
+  { product_id: '7567ec4b-b10c-48c5-9345-fc73c48a80b6', count: 8 },
+  { product_id: '7567ec4b-b10c-48c5-9345-fc73c48a80b7', count: 17 },
+  { product_id: '7567ec4b-b10c-48c5-9345-fc73c48a80b8', count: 5 },
+  { product_id: '7567ec4b-b10c-48c5-9345-fc73c48a80b9', count: 7 },
+  { product_id: '7567ec4b-b10c-48c5-9345-fc73c48a80c0', count: 16 },
+  { product_id: '7567ec4b-b10c-48c5-9345-fc73c48a80c1', count: 20 },
+  { product_id: '7567ec4b-b10c-48c5-9345-fc73c48a80c2', count: 7 },
+  { product_id: '7567ec4b-b10c-48c5-9345-fc73c48a80c3', count: 17 }
 ];

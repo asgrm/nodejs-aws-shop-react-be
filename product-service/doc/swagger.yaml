@@ -33,6 +33,26 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Product"
+        "404":
+          description: Products not found
+        "500":
+          description: Internal Server Error, default BE error code
+    post:
+      tags:
+        - Products
+      summary: Product creation
+      requestBody:
+        description: description of new product
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductCreation"
+      responses:
+        "200":
+          description: successful operation
+        "400":
+          description: Validation failed
         "500":
           description: Internal Server Error, default BE error code
   /products/{productId}:
@@ -74,6 +94,24 @@ components:
         description:
           type: string
           example: "A stick"
-        quantity:
+        price:
           type: integer
           example: 7.2
+        count:
+          type: integer
+          example: 2
+    ProductCreation:
+      type: object
+      properties:
+        title:
+          type: string
+          example: "dino-robo"
+        description:
+          type: string
+          example: "A dino robot"
+        price:
+          type: integer
+          example: 8
+        count:
+          type: integer
+          example: 16
