@@ -5,7 +5,7 @@ import * as s3 from "aws-cdk-lib/aws-s3";
 import * as s3notifications from 'aws-cdk-lib/aws-s3-notifications';
 import * as apiGateway from '@aws-cdk/aws-apigatewayv2-alpha';
 import { HttpLambdaIntegration } from '@aws-cdk/aws-apigatewayv2-integrations-alpha';
-
+import * as sqs from "aws-cdk-lib/aws-sqs";
 import 'dotenv/config';
 
 const BASE_URL = 'import';
@@ -16,6 +16,7 @@ const stack = new cdk.Stack(app, "ImportServiceStack", {
   env: { region: process.env.PRODUCT_AWS_REGION || "eu-west-1" },
 });
 
+const productQueue = sqs.Queue.fromQueueArn(stack, 'ProductQueue', process.env.PRODUCT_QUEUE_ARN!)
 
 const bucket = new s3.Bucket(stack, "ImportBucket", {
   bucketName: "import-bucket-asgrm",
@@ -51,10 +52,17 @@ const importProductsFile = new NodejsFunction(stack, 'ImportProductsFileLambda',
   functionName: 'importProductsFile',
 });
 const importFileParser = new NodejsFunction(stack, 'ImportFileParser Lambda', {
-  ...sharedLambdaProps,
+  runtime: lambda.Runtime.NODEJS_18_X,
+  environment: {
+    PRODUCT_AWS_REGION: process.env.PRODUCT_AWS_REGION!,
+    IMPORT_BUCKET_NAME: bucket.bucketName,
+    PRODUCT_QUEUE: productQueue.queueName
+  },
   entry: 'src/handlers/importFileParser/app.ts',
   functionName: 'importFileParser',
 });
+
+productQueue.grantSendMessages(importFileParser);
 
 bucket.grantReadWrite(importProductsFile);
 bucket.grantReadWrite(importFileParser);
