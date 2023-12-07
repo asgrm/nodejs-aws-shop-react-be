@@ -17,9 +17,18 @@ const stack = new cdk.Stack(app, "ProductServiceStack", {
   env: { region: process.env.PRODUCT_AWS_REGION },
 });
 
+const catalogItemsDQL = new sqs.Queue(stack, 'CatalogItemsDLQ', {
+  queueName: 'catalog-items-queue-dlq.fifo',
+  fifo: true
+});
+
 const catalogItemsQueue = new sqs.Queue(stack, 'CatalogItemsQueue', {
   queueName: 'catalog-items-queue.fifo',
-  fifo: true
+  fifo: true,
+  deadLetterQueue: {
+    maxReceiveCount: 3,
+    queue: catalogItemsDQL,
+  }
 });
 
 const createProductTopic = new sns.Topic(stack, 'CreateProductTopic', {
@@ -124,6 +133,10 @@ new cdk.CfnOutput(stack, 'ApiUrl', {
 
 new cdk.CfnOutput(stack, 'QueueArn', {
   value: `queue name: ${catalogItemsQueue.queueName} arn: ${catalogItemsQueue.queueArn}`
+});
+
+new cdk.CfnOutput(stack, 'DLQArn', {
+  value: `DLQ name: ${catalogItemsDQL.queueName} arn: ${catalogItemsDQL.queueArn}`
 });
 
 new cdk.CfnOutput(stack, 'SNSArn', {
