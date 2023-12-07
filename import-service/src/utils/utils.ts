@@ -51,3 +51,30 @@ export function getMimeTypeByFileExtension(fileExtension: string): string {
   }
 }
 
+
+export function csvRecordToDBEntites<T extends object>(record: T): [Product, Stock] {
+  const { messageId: id } = record;
+  const payload = JSON.parse(record.body);
+
+  const {
+    title = '',
+    description = '',
+    price = 0,
+    count = 0
+  } = payload;
+
+  const product: Product = {
+    id,
+    title,
+    description,
+    price,
+  };
+
+  const stock: Stock = {
+    product_id: id,
+    count
+  };
+
+  return [product, stock];
+}
+

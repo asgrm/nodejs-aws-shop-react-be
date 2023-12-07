@@ -4,6 +4,7 @@ import { Readable } from 'stream';
 
 import * as csvUtils from '../../utils/csv'
 import * as s3Utils from '../../utils/s3utils';
+import * as sqsUtils from '../../utils/sqs';
 
 const mockEvent200: S3Event = {
   'Records': [
@@ -39,14 +40,17 @@ const mockStream = new Readable()
 
 jest.mock('../../utils/csv');
 jest.mock('../../utils/s3utils');
+jest.mock('../../utils/sqs');
 
 describe('Import Lambda Function', () => {
   let spyOnReadCSVFileStream: jest.SpyInstance;
   let spyOnGetS3ReadStream: jest.SpyInstance;
+  let spyOnSendSQSMessage: jest.SpyInstance;
 
   beforeAll(() => {
     spyOnReadCSVFileStream = jest.spyOn(csvUtils, 'readCSVFileStream');
     spyOnGetS3ReadStream = jest.spyOn(s3Utils, 'getS3ReadStream');
+    spyOnSendSQSMessage = jest.spyOn(sqsUtils, 'sendSQSMessage');
   });
 
   afterEach(() => {
@@ -55,9 +59,11 @@ describe('Import Lambda Function', () => {
   it('should successfully process the S3 object and call readCSVFileStream', async () => {
     spyOnGetS3ReadStream.mockResolvedValue(mockStream);
     spyOnReadCSVFileStream.mockResolvedValue(true);
+    spyOnSendSQSMessage.mockResolvedValue(true);
     await handler(mockEvent200);
 
     expect(spyOnReadCSVFileStream).toHaveBeenCalledTimes(1);
     expect(spyOnGetS3ReadStream).toHaveBeenCalledTimes(1);
+    expect(spyOnSendSQSMessage).not.toHaveBeenCalled();
   });
 });

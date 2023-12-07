@@ -38,14 +38,15 @@ const stocksTable = TableV2.fromTableName(stack, 'stocksTable', 'stocks');
 const sharedLambdaProps: Partial<NodejsFunctionProps> = {
   runtime: lambda.Runtime.NODEJS_18_X,
   environment: {
-    PG_HOST: process.env.PG_HOST || '',
-    PG_PORT: process.env.PG_PORT || '5432',
-    PG_DATABASE: process.env.PGPG_DATABASE || '',
-    PG_USERNAME: process.env.PG_USERNAME || '',
-    PG_PASSWORD: process.env.PG_PASSWORD || '',
+    // PG_HOST: process.env.PG_HOST || '',
+    // PG_PORT: process.env.PG_PORT || '5432',
+    // PG_DATABASE: process.env.PGPG_DATABASE || '',
+    // PG_USERNAME: process.env.PG_USERNAME || '',
+    // PG_PASSWORD: process.env.PG_PASSWORD || '',
     PRODUCT_AWS_REGION: process.env.PRODUCT_AWS_REGION!,
     TABLE_NAME_PRODUCT: productsTable.tableName,
     TABLE_NAME_STOCK: stocksTable.tableName,
+    PRODUCT_TOPIC_ARN: createProductTopic.topicArn
   },
 }
 

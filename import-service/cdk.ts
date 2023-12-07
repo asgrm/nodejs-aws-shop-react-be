@@ -56,7 +56,7 @@ const importFileParser = new NodejsFunction(stack, 'ImportFileParser Lambda', {
   environment: {
     PRODUCT_AWS_REGION: process.env.PRODUCT_AWS_REGION!,
     IMPORT_BUCKET_NAME: bucket.bucketName,
-    PRODUCT_QUEUE: productQueue.queueName
+    PRODUCT_QUEUE: productQueue.queueUrl
   },
   entry: 'src/handlers/importFileParser/app.ts',
   functionName: 'importFileParser',

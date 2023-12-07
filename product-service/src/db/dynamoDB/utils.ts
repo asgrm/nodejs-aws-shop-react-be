@@ -1,6 +1,12 @@
 import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
-import { DynamoDBClient, ScanCommand, TransactWriteItemsCommand, QueryCommand } from "@aws-sdk/client-dynamodb";
-import { Product, Stock } from '../../types/index';
+import {
+  DynamoDBClient,
+  ScanCommand,
+  TransactWriteItemsCommand,
+  QueryCommand,
+  PutItemCommand
+} from "@aws-sdk/client-dynamodb";
+import { Product, Stock, ProductWithStock } from '../../types/index';
 
 const dynamoDb = new DynamoDBClient({
   region: process.env.PRODUCT_AWS_REGION || "eu-west-1",
@@ -39,7 +45,7 @@ export async function createProduct(
   stock: Stock,
   productsTableName: string,
   stocksTableName: string
-) {
+): Promise<ProductWithStock> {
   const transactItems = [
     {
       Put: {
@@ -58,6 +64,10 @@ export async function createProduct(
   try {
     const command = new TransactWriteItemsCommand({ TransactItems: transactItems });
     await dynamoDb.send(command);
+    return ({
+      ...product,
+      count: stock.count,
+    })
   } catch (err) {
     console.log(err);
     throw err;

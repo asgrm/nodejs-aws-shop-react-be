@@ -1,9 +1,11 @@
-const defaultHeaders = {
-  'Access-Control-Allow-Methods': '*',
-  'Access-Control-Allow-Headers': '*',
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Credentials': true,
-}
+import { SQSRecord } from "aws-lambda";
+import { Product, Stock } from '../types/index'
+// const defaultHeaders = {
+//   'Access-Control-Allow-Methods': '*',
+//   'Access-Control-Allow-Headers': '*',
+//   'Access-Control-Allow-Origin': '*',
+//   'Access-Control-Allow-Credentials': true,
+// }
 
 export function buildResponse(statusCode: number = 200, body?: any, headers?: object) {
   return ({
@@ -31,3 +33,30 @@ export function checkBodyParameters<T extends Record<string | symbol, unknown>>(
     return true;
   });
 }
+
+export function recordToDBEntites(record: SQSRecord): [Product, Stock] {
+  const { messageId: id } = record;
+  const payload = JSON.parse(record.body);
+
+  const {
+    title = '',
+    description = '',
+    price = 0,
+    count = 0
+  } = payload;
+
+  const product: Product = {
+    id,
+    title,
+    description,
+    price,
+  };
+
+  const stock: Stock = {
+    product_id: id,
+    count
+  };
+
+  return [product, stock];
+}
+
