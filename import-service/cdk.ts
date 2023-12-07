@@ -13,7 +13,7 @@ const BASE = `/${BASE_URL}`;
 
 const app = new cdk.App();
 const stack = new cdk.Stack(app, "ImportServiceStack", {
-  env: { region: process.env.PRODUCT_AWS_REGION || "eu-west-1" },
+  env: { region: process.env.PRODUCT_AWS_REGION },
 });
 
 const productQueue = sqs.Queue.fromQueueArn(stack, 'ProductQueue', process.env.PRODUCT_QUEUE_ARN!)

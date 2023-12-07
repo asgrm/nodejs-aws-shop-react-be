@@ -13,7 +13,7 @@ import { getMimeTypeByFileExtension } from './utils';
 import { S3UploadParams, S3ReadStreamParams, moveS3ObjectParams } from '../types/index'
 
 const client = new S3Client({
-  region: process.env.PRODUCT_AWS_REGION || "eu-west-1",
+  region: process.env.PRODUCT_AWS_REGION,
 });
 
 export async function getS3UploadUrl(

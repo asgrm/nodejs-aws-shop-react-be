@@ -2,7 +2,7 @@ import { SQSClient, SendMessageCommand } from "@aws-sdk/client-sqs"; // ES Modul
 import { randomUUID } from 'crypto';
 
 const client = new SQSClient({
-  region: process.env.PRODUCT_AWS_REGION || "eu-west-1",
+  region: process.env.PRODUCT_AWS_REGION,
 });
 
 
