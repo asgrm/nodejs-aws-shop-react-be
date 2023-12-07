@@ -23,9 +23,11 @@ export const handler = async (
       );
     }
 
-    const {
+    let {
       name: fileName
     } = value;
+
+    fileName = decodeURIComponent(fileName.replace(/\+/g, " "));
 
     if (!fileName.endsWith('.csv')) {
       return buildResponse(400, { message: 'Only csv files are allowed' });
