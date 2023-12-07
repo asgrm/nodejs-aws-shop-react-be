@@ -5,7 +5,7 @@ import { stocks, products } from '../../mocks/data'
 
 
 const client = new DynamoDBClient({
-  region: "eu-west-1",
+  region: process.env.PRODUCT_AWS_REGION,
 });
 
 const tableNameProducts = "products";

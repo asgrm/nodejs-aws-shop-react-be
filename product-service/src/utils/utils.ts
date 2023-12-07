@@ -49,12 +49,12 @@ export function recordToDBEntites(record: SQSRecord): [Product, Stock] {
     id,
     title,
     description,
-    price,
+    price: +price,
   };
 
   const stock: Stock = {
     product_id: id,
-    count
+    count: +count
   };
 
   return [product, stock];

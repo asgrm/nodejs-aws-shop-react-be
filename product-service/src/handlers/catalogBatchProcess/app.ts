@@ -10,11 +10,10 @@ const { TABLE_NAME_PRODUCT, TABLE_NAME_STOCK, PRODUCT_TOPIC_ARN } = process.env;
 export const handler = async (
   event: SQSEvent
 ): Promise<any> => {
-  console.log('event', event);
+  console.log('event', JSON.stringify(event));
   const { Records = [] } = event;
 
   for (const record of Records) {
-
     try {
       const [product, stock] = recordToDBEntites(record);
       const createdProduct = await createProduct(product, stock, TABLE_NAME_PRODUCT!, TABLE_NAME_STOCK!);
@@ -34,7 +33,5 @@ export const handler = async (
       console.log('error', err)
     }
   }
-
-  //explicitly ends lambda, no need to "buildResponse"
   return true;
 }

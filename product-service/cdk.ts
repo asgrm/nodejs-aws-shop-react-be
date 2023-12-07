@@ -14,7 +14,7 @@ const BASE = `/${BASE_URL}`;
 
 const app = new cdk.App();
 const stack = new cdk.Stack(app, "ProductServiceStack", {
-  env: { region: process.env.PRODUCT_AWS_REGION || "eu-west-1" },
+  env: { region: process.env.PRODUCT_AWS_REGION },
 });
 
 const catalogItemsQueue = new sqs.Queue(stack, 'CatalogItemsQueue', {
@@ -30,6 +30,11 @@ new sns.Subscription(stack, 'PrimaryEmailSubscription', {
   endpoint: process.env.PRIMARY_EMAIL || '',
   protocol: sns.SubscriptionProtocol.EMAIL,
   topic: createProductTopic,
+  filterPolicy: {
+    count: sns.SubscriptionFilter.numericFilter({
+      between: { start: 1, stop: 10 },
+    })
+  }
 });
 
 const productsTable = TableV2.fromTableName(stack, 'ProductTable', 'products');
@@ -38,11 +43,6 @@ const stocksTable = TableV2.fromTableName(stack, 'stocksTable', 'stocks');
 const sharedLambdaProps: Partial<NodejsFunctionProps> = {
   runtime: lambda.Runtime.NODEJS_18_X,
   environment: {
-    // PG_HOST: process.env.PG_HOST || '',
-    // PG_PORT: process.env.PG_PORT || '5432',
-    // PG_DATABASE: process.env.PGPG_DATABASE || '',
-    // PG_USERNAME: process.env.PG_USERNAME || '',
-    // PG_PASSWORD: process.env.PG_PASSWORD || '',
     PRODUCT_AWS_REGION: process.env.PRODUCT_AWS_REGION!,
     TABLE_NAME_PRODUCT: productsTable.tableName,
     TABLE_NAME_STOCK: stocksTable.tableName,
@@ -88,6 +88,9 @@ stocksTable.grantReadData(getProductsById);
 
 productsTable.grantWriteData(createProduct);
 stocksTable.grantWriteData(createProduct);
+
+productsTable.grantWriteData(catalogBatchProcess);
+stocksTable.grantWriteData(catalogBatchProcess);
 
 const api = new apiGateway.HttpApi(stack, 'ProductApi', {
   corsPreflight: {

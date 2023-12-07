@@ -3,13 +3,12 @@ import {
   DynamoDBClient,
   ScanCommand,
   TransactWriteItemsCommand,
-  QueryCommand,
-  PutItemCommand
+  QueryCommand
 } from "@aws-sdk/client-dynamodb";
 import { Product, Stock, ProductWithStock } from '../../types/index';
 
 const dynamoDb = new DynamoDBClient({
-  region: process.env.PRODUCT_AWS_REGION || "eu-west-1",
+  region: process.env.PRODUCT_AWS_REGION,
 });
 
 export async function queryItem(key: string, value: string, TableName: string) {

@@ -1,6 +1,6 @@
 import { SNSClient, PublishCommand, MessageAttributeValue } from "@aws-sdk/client-sns";
 const client = new SNSClient({
-  region: process.env.PRODUCT_AWS_REGION || "eu-west-1",
+  region: process.env.PRODUCT_AWS_REGION,
 });
 
 
