@@ -22,7 +22,8 @@ const productQueue = sqs.Queue.fromQueueArn(stack, 'ProductQueue', process.env.P
 const basicAuthorizer = lambda.Function.fromFunctionArn(stack, 'basicAuthorizer', process.env.AUTHORIZER_FUNCTION_ARN!);
 
 const authorizer = new HttpLambdaAuthorizer('Authorizer', basicAuthorizer, {
-  responseTypes: [HttpLambdaResponseType.IAM]
+  responseTypes: [HttpLambdaResponseType.IAM],
+  resultsCacheTtl: cdk.Duration.seconds(0)
 });
 
 new lambda.CfnPermission(stack, 'MyAuthorizerPermission', {
