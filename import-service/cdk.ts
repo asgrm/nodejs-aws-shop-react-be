@@ -6,7 +6,9 @@ import * as s3notifications from 'aws-cdk-lib/aws-s3-notifications';
 import * as apiGateway from '@aws-cdk/aws-apigatewayv2-alpha';
 import { HttpLambdaIntegration } from '@aws-cdk/aws-apigatewayv2-integrations-alpha';
 import * as sqs from "aws-cdk-lib/aws-sqs";
+import { HttpLambdaAuthorizer, HttpLambdaResponseType } from '@aws-cdk/aws-apigatewayv2-authorizers-alpha';
 import 'dotenv/config';
+
 const BASE_URL = 'import';
 const BASE = `/${BASE_URL}`;
 
@@ -16,6 +18,19 @@ const stack = new cdk.Stack(app, "ImportServiceStack", {
 });
 
 const productQueue = sqs.Queue.fromQueueArn(stack, 'ProductQueue', process.env.PRODUCT_QUEUE_ARN!);
+
+const basicAuthorizer = lambda.Function.fromFunctionArn(stack, 'basicAuthorizer', process.env.AUTHORIZER_FUNCTION_ARN!);
+
+const authorizer = new HttpLambdaAuthorizer('Authorizer', basicAuthorizer, {
+  responseTypes: [HttpLambdaResponseType.IAM]
+});
+
+new lambda.CfnPermission(stack, 'MyAuthorizerPermission', {
+  action: 'lambda:InvokeFunction',
+  functionName: basicAuthorizer.functionName,
+  principal: 'apigateway.amazonaws.com',
+  sourceAccount: stack.account,
+});
 
 const bucket = new s3.Bucket(stack, "ImportBucket", {
   bucketName: "import-bucket-asgrm",
@@ -51,6 +66,7 @@ const importProductsFile = new NodejsFunction(stack, 'ImportProductsFileLambda',
   functionName: 'importProductsFile',
 });
 
+//TODO delete authTest lambda
 const authTest = new NodejsFunction(stack, 'AuthTestLambda', {
   ...sharedLambdaProps,
   entry: 'src/handlers/authTest/app.ts',
@@ -83,7 +99,7 @@ const api = new apiGateway.HttpApi(stack, 'ImportApi', {
     allowHeaders: ['*'],
     allowMethods: [apiGateway.CorsHttpMethod.ANY],
     allowOrigins: ['*'],
-  },
+  }
 });
 
 api.addRoutes({
@@ -92,18 +108,12 @@ api.addRoutes({
   integration: new HttpLambdaIntegration('ImportProductsFileLambdaIntegration', importProductsFile)
 });
 
+//TODO move authorizer to base path
 api.addRoutes({
-  path: `/test`,
+  path: `/tests`,
   methods: [apiGateway.HttpMethod.GET],
-  integration: new HttpLambdaIntegration('AuthTestLambdaIntegration', authTest)
-});
-
-const authorizer = new apiGateway.HttpAuthorizer(stack, 'BasicHttpAuthorizer', {
-  authorizerName: 'auth-test',
-  type: apiGateway.HttpAuthorizerType.LAMBDA,
-  httpApi: api,
-  identitySource: ['request.header.Authorization'],
-  authorizerUri: `arn:aws:apigateway:${process.env.PRODUCT_AWS_REGION}:lambda:path/2015-03-31/functions/${process.env.AUTHORIZER_FUNCTION_ARN!}/invocations`,
+  integration: new HttpLambdaIntegration('AuthTestLambdaIntegration', authTest),
+  authorizer
 });
 
 new cdk.CfnOutput(stack, 'ApiUrl', {
