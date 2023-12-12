@@ -24,6 +24,8 @@ paths:
       tags:
         - Import
       summary: Get import presigned url
+      security:
+        - BasicAuth: []
       responses:
         "200":
           description: successful operation
@@ -37,6 +39,10 @@ paths:
           description: Internal Server Error, default BE error code
 
 components:
+  securitySchemes:
+    BasicAuth:
+      type: http
+      scheme: basic
   schemas:
     SignedUrl:
       type: object
