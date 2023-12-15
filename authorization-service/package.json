@@ -1,8 +1,8 @@
 {
-  "name": "import-service",
+  "name": "authorization-service",
   "version": "0.1.0",
   "bin": {
-    "import-service": "bin/import-service.js"
+    "authorization-service": "bin/authorization-service.js"
   },
   "scripts": {
     "build": "tsc",
@@ -11,14 +11,10 @@
     "cdk": "cdk",
     "bootstrap": "npx cdk bootstrap",
     "deploy": "npx cdk deploy",
-    "destroy": "npx cdk destroy",
-    "dynamo:init": "ts-node src/db/dynamoDB/initData.ts"
+    "destroy": "npx cdk destroy"
   },
   "devDependencies": {
-    "@aws-cdk/aws-apigatewayv2-alpha": "^2.105.0-alpha.0",
-    "@aws-cdk/aws-apigatewayv2-integrations-alpha": "^2.105.0-alpha.0",
     "@types/jest": "^29.5.5",
-    "@types/joi": "^17.2.3",
     "@types/node": "20.7.1",
     "@typescript-eslint/eslint-plugin": "^6.10.0",
     "@typescript-eslint/parser": "^6.10.0",
@@ -32,17 +28,9 @@
     "typescript": "~5.2.2"
   },
   "dependencies": {
-    "@aws-cdk/aws-apigatewayv2-authorizers-alpha": "^2.114.1-alpha.0",
-    "@aws-sdk/client-dynamodb": "^3.454.0",
-    "@aws-sdk/client-s3": "^3.456.0",
-    "@aws-sdk/client-sqs": "^3.465.0",
-    "@aws-sdk/s3-request-presigner": "^3.456.0",
-    "@aws-sdk/util-dynamodb": "^3.454.0",
     "@types/aws-lambda": "^8.10.126",
     "aws-cdk-lib": "2.104.0",
     "constructs": "^10.0.0",
-    "csv-parser": "^3.0.0",
-    "dotenv": "^16.3.1",
-    "joi": "^17.11.0"
+    "dotenv": "^16.3.1"
   }
 }

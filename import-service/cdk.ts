@@ -6,6 +6,7 @@ import * as s3notifications from 'aws-cdk-lib/aws-s3-notifications';
 import * as apiGateway from '@aws-cdk/aws-apigatewayv2-alpha';
 import { HttpLambdaIntegration } from '@aws-cdk/aws-apigatewayv2-integrations-alpha';
 import * as sqs from "aws-cdk-lib/aws-sqs";
+import { HttpLambdaAuthorizer, HttpLambdaResponseType } from '@aws-cdk/aws-apigatewayv2-authorizers-alpha';
 import 'dotenv/config';
 
 const BASE_URL = 'import';
@@ -16,7 +17,21 @@ const stack = new cdk.Stack(app, "ImportServiceStack", {
   env: { region: process.env.PRODUCT_AWS_REGION },
 });
 
-const productQueue = sqs.Queue.fromQueueArn(stack, 'ProductQueue', process.env.PRODUCT_QUEUE_ARN!)
+const productQueue = sqs.Queue.fromQueueArn(stack, 'ProductQueue', process.env.PRODUCT_QUEUE_ARN!);
+
+const basicAuthorizer = lambda.Function.fromFunctionArn(stack, 'basicAuthorizer', process.env.AUTHORIZER_FUNCTION_ARN!);
+
+const authorizer = new HttpLambdaAuthorizer('Authorizer', basicAuthorizer, {
+  responseTypes: [HttpLambdaResponseType.IAM],
+  resultsCacheTtl: cdk.Duration.seconds(0)
+});
+
+new lambda.CfnPermission(stack, 'MyAuthorizerPermission', {
+  action: 'lambda:InvokeFunction',
+  functionName: basicAuthorizer.functionName,
+  principal: 'apigateway.amazonaws.com',
+  sourceAccount: stack.account,
+});
 
 const bucket = new s3.Bucket(stack, "ImportBucket", {
   bucketName: "import-bucket-asgrm",
@@ -51,6 +66,7 @@ const importProductsFile = new NodejsFunction(stack, 'ImportProductsFileLambda',
   entry: 'src/handlers/importProductsFile/app.ts',
   functionName: 'importProductsFile',
 });
+
 const importFileParser = new NodejsFunction(stack, 'ImportFileParser Lambda', {
   runtime: lambda.Runtime.NODEJS_18_X,
   environment: {
@@ -77,13 +93,14 @@ const api = new apiGateway.HttpApi(stack, 'ImportApi', {
     allowHeaders: ['*'],
     allowMethods: [apiGateway.CorsHttpMethod.ANY],
     allowOrigins: ['*'],
-  },
+  }
 });
 
 api.addRoutes({
   path: `${BASE}`,
   methods: [apiGateway.HttpMethod.GET],
-  integration: new HttpLambdaIntegration('ImportProductsFileLambdaIntegration', importProductsFile)
+  integration: new HttpLambdaIntegration('ImportProductsFileLambdaIntegration', importProductsFile),
+  authorizer
 });
 
 new cdk.CfnOutput(stack, 'ApiUrl', {
