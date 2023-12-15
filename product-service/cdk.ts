@@ -4,6 +4,9 @@ import { HttpLambdaIntegration } from '@aws-cdk/aws-apigatewayv2-integrations-al
 import { TableV2 } from "aws-cdk-lib/aws-dynamodb";
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import { NodejsFunction, NodejsFunctionProps } from 'aws-cdk-lib/aws-lambda-nodejs';
+import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources';
+import * as sqs from "aws-cdk-lib/aws-sqs";
+import * as sns from "aws-cdk-lib/aws-sns";
 import 'dotenv/config';
 
 const BASE_URL = 'products';
@@ -11,7 +14,36 @@ const BASE = `/${BASE_URL}`;
 
 const app = new cdk.App();
 const stack = new cdk.Stack(app, "ProductServiceStack", {
-  env: { region: process.env.PRODUCT_AWS_REGION || "eu-west-1" },
+  env: { region: process.env.PRODUCT_AWS_REGION },
+});
+
+const catalogItemsDQL = new sqs.Queue(stack, 'CatalogItemsDLQ', {
+  queueName: 'catalog-items-queue-dlq.fifo',
+  fifo: true
+});
+
+const catalogItemsQueue = new sqs.Queue(stack, 'CatalogItemsQueue', {
+  queueName: 'catalog-items-queue.fifo',
+  fifo: true,
+  deadLetterQueue: {
+    maxReceiveCount: 3,
+    queue: catalogItemsDQL,
+  }
+});
+
+const createProductTopic = new sns.Topic(stack, 'CreateProductTopic', {
+  topicName: 'create-product-topic'
+});
+
+new sns.Subscription(stack, 'PrimaryEmailSubscription', {
+  endpoint: process.env.PRIMARY_EMAIL || '',
+  protocol: sns.SubscriptionProtocol.EMAIL,
+  topic: createProductTopic,
+  filterPolicy: {
+    count: sns.SubscriptionFilter.numericFilter({
+      between: { start: 1, stop: 10 },
+    })
+  }
 });
 
 const productsTable = TableV2.fromTableName(stack, 'ProductTable', 'products');
@@ -20,14 +52,10 @@ const stocksTable = TableV2.fromTableName(stack, 'stocksTable', 'stocks');
 const sharedLambdaProps: Partial<NodejsFunctionProps> = {
   runtime: lambda.Runtime.NODEJS_18_X,
   environment: {
-    PG_HOST: process.env.PG_HOST || '',
-    PG_PORT: process.env.PG_PORT || '5432',
-    PG_DATABASE: process.env.PGPG_DATABASE || '',
-    PG_USERNAME: process.env.PG_USERNAME || '',
-    PG_PASSWORD: process.env.PG_PASSWORD || '',
     PRODUCT_AWS_REGION: process.env.PRODUCT_AWS_REGION!,
     TABLE_NAME_PRODUCT: productsTable.tableName,
     TABLE_NAME_STOCK: stocksTable.tableName,
+    PRODUCT_TOPIC_ARN: createProductTopic.topicArn
   },
 }
 
@@ -49,6 +77,18 @@ const createProduct = new NodejsFunction(stack, 'CreateProductLambda', {
   functionName: 'createProduct',
 });
 
+const catalogBatchProcess = new NodejsFunction(stack, 'CatalogBatchProcessLambda', {
+  ...sharedLambdaProps,
+  entry: 'src/handlers/catalogBatchProcess/app.ts',
+  functionName: 'catalogBatchProcess',
+});
+
+createProductTopic.grantPublish(catalogBatchProcess);
+
+catalogBatchProcess.addEventSource(new SqsEventSource(catalogItemsQueue, {
+  batchSize: 5,
+}));
+
 productsTable.grantReadData(getProductsList);
 stocksTable.grantReadData(getProductsList);
 
@@ -57,6 +97,9 @@ stocksTable.grantReadData(getProductsById);
 
 productsTable.grantWriteData(createProduct);
 stocksTable.grantWriteData(createProduct);
+
+productsTable.grantWriteData(catalogBatchProcess);
+stocksTable.grantWriteData(catalogBatchProcess);
 
 const api = new apiGateway.HttpApi(stack, 'ProductApi', {
   corsPreflight: {
@@ -86,4 +129,16 @@ api.addRoutes({
 
 new cdk.CfnOutput(stack, 'ApiUrl', {
   value: `${api.url}${BASE_URL}`,
+});
+
+new cdk.CfnOutput(stack, 'QueueArn', {
+  value: `queue name: ${catalogItemsQueue.queueName} arn: ${catalogItemsQueue.queueArn}`
+});
+
+new cdk.CfnOutput(stack, 'DLQArn', {
+  value: `DLQ name: ${catalogItemsDQL.queueName} arn: ${catalogItemsDQL.queueArn}`
+});
+
+new cdk.CfnOutput(stack, 'SNSArn', {
+  value: `SNS name: ${createProductTopic.topicName} arn: ${createProductTopic.topicArn}`
 });

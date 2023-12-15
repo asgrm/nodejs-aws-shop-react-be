@@ -25,7 +25,6 @@ export function checkBodyParameters<T extends Record<string | symbol, unknown>>(
   });
 }
 
-
 export function getMimeTypeByFileExtension(fileExtension: string): string {
   switch (fileExtension) {
     case 'pdf':
@@ -50,4 +49,3 @@ export function getMimeTypeByFileExtension(fileExtension: string): string {
       return 'text/plain';
   }
 }
-
