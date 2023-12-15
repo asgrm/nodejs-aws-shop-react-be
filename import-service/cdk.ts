@@ -67,13 +67,6 @@ const importProductsFile = new NodejsFunction(stack, 'ImportProductsFileLambda',
   functionName: 'importProductsFile',
 });
 
-//TODO delete authTest lambda
-const authTest = new NodejsFunction(stack, 'AuthTestLambda', {
-  ...sharedLambdaProps,
-  entry: 'src/handlers/authTest/app.ts',
-  functionName: 'authTest',
-});
-
 const importFileParser = new NodejsFunction(stack, 'ImportFileParser Lambda', {
   runtime: lambda.Runtime.NODEJS_18_X,
   environment: {
@@ -106,14 +99,7 @@ const api = new apiGateway.HttpApi(stack, 'ImportApi', {
 api.addRoutes({
   path: `${BASE}`,
   methods: [apiGateway.HttpMethod.GET],
-  integration: new HttpLambdaIntegration('ImportProductsFileLambdaIntegration', importProductsFile)
-});
-
-//TODO move authorizer to base path
-api.addRoutes({
-  path: `/tests`,
-  methods: [apiGateway.HttpMethod.GET],
-  integration: new HttpLambdaIntegration('AuthTestLambdaIntegration', authTest),
+  integration: new HttpLambdaIntegration('ImportProductsFileLambdaIntegration', importProductsFile),
   authorizer
 });
 
